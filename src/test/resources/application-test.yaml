@@ -15,6 +15,9 @@ spring:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
+  liquibase:
+    enabled: false
+
   sql:
     init:
       mode: never
