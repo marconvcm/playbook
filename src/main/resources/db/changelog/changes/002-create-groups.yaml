@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-groups
+      author: codex
+      changes:
+        - createSequence:
+            sequenceName: groups_id_seq
+            startValue: 1
+            incrementBy: 1
+        - createTable:
+            tableName: groups
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: owner_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: summary
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: groups
+            baseColumnNames: owner_id
+            constraintName: fk_groups_owner_id
+            referencedTableName: users
+            referencedColumnNames: id
+        - createIndex:
+            tableName: groups
+            indexName: idx_groups_group_id
+            columns:
+              - column:
+                  name: group_id
+        - createIndex:
+            tableName: groups
+            indexName: idx_groups_owner_id
+            columns:
+              - column:
+                  name: owner_id
