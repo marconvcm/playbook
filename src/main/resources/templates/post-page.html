@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Post')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${currentUser})}"></header>
+<main class="page">
+    <section class="card">
+        <h2 th:text="${topic.title}">Topic</h2>
+        <p class="muted">Author #<span th:text="${topic.userId}">1</span>
+            <span th:if="${topic.groupId != null}"> · Group #<span th:text="${topic.groupId}">1</span></span>
+        </p>
+        <p th:text="${topic.content}">Topic content</p>
+    </section>
+
+    <section class="card">
+        <h2>Answers</h2>
+        <div class="list" th:if="${!answers.isEmpty()}">
+            <article class="item" th:each="answer : ${answers}">
+                <h3><a th:href="@{/app/posts/{id}(id=${answer.id})}" th:text="${answer.title}">Answer title</a></h3>
+                <p class="muted">Author #<span th:text="${answer.userId}">1</span></p>
+                <p th:text="${answer.content}">answer content</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${answers.isEmpty()}">No answers yet.</p>
+    </section>
+</main>
+</body>
+</html>

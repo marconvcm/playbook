@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${currentUser})}"></header>
+<main class="page">
+    <section th:replace="~{fragments/layout :: alerts}"></section>
+
+    <section class="grid two" th:if="${currentUser == null}">
+        <article class="card">
+            <h2>Sign in</h2>
+            <form th:action="@{/app/ui/signin}" th:object="${signInForm}" method="post" class="stack">
+                <label>Email <input type="email" th:field="*{email}" required></label>
+                <label>Password <input type="password" th:field="*{password}" required></label>
+                <button type="submit" class="btn">Sign in</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>Create account</h2>
+            <form th:action="@{/app/ui/signup}" th:object="${signUpForm}" method="post" class="stack">
+                <label>Handle <input type="text" th:field="*{handle}" required></label>
+                <label>First name <input type="text" th:field="*{firstName}" required></label>
+                <label>Last name <input type="text" th:field="*{lastName}" required></label>
+                <label>Email <input type="email" th:field="*{email}" required></label>
+                <label>Password <input type="password" th:field="*{password}" required minlength="8"></label>
+                <button type="submit" class="btn">Sign up</button>
+            </form>
+        </article>
+    </section>
+
+    <section class="grid two" th:if="${currentUser != null}">
+        <article class="card">
+            <h2>Create group</h2>
+            <form th:action="@{/app/ui/groups}" th:object="${createGroupForm}" method="post" class="stack">
+                <label>Group ID <input type="text" th:field="*{groupId}" required></label>
+                <label>Title <input type="text" th:field="*{title}" required></label>
+                <label>Summary <textarea th:field="*{summary}"></textarea></label>
+                <button type="submit" class="btn">Create group</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>Create post</h2>
+            <form th:action="@{/app/ui/posts}" th:object="${createPostForm}" method="post" class="stack">
+                <label>Title <input type="text" th:field="*{title}" required></label>
+                <label>Content <textarea th:field="*{content}" required></textarea></label>
+                <label>Group ID (optional) <input type="number" th:field="*{groupId}"></label>
+                <label>Parent post ID (optional) <input type="number" th:field="*{parentId}"></label>
+                <button type="submit" class="btn">Publish post</button>
+            </form>
+        </article>
+    </section>
+
+    <section class="card">
+        <h2>Groups</h2>
+        <div class="list" th:if="${!groups.isEmpty()}">
+            <article class="item" th:each="group : ${groups}">
+                <h3><a th:href="@{/app/groups/{id}(id=${group.id})}" th:text="${group.title}">Group title</a></h3>
+                <p class="muted"><strong th:text="${group.groupId}">group-id</strong> · Owner #<span th:text="${group.ownerId}">1</span></p>
+                <p th:text="${group.summary}">Summary</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${groups.isEmpty()}">No groups yet.</p>
+    </section>
+
+    <section class="card">
+        <h2>Posts</h2>
+        <div class="list" th:if="${!posts.isEmpty()}">
+            <article class="item" th:each="post : ${posts}">
+                <h3><a th:href="@{/app/posts/{id}(id=${post.id})}" th:text="${post.title}">Post title</a></h3>
+                <p class="muted">Author #<span th:text="${post.userId}">1</span>
+                    <span th:if="${post.groupId != null}"> · Group #<span th:text="${post.groupId}">2</span></span>
+                    <span th:if="${post.parentId != null}"> · Reply to #<span th:text="${post.parentId}">10</span></span>
+                </p>
+                <p th:text="${post.content}">Post content</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${posts.isEmpty()}">No posts yet.</p>
+    </section>
+</main>
+</body>
+</html>

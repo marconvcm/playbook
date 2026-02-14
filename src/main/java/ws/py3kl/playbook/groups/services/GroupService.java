@@ -27,6 +27,13 @@ public class GroupService {
             .toList();
     }
 
+    public List<Group> findOwnedByUser(Long ownerId) {
+        return groupRepository.findByOwnerId(ownerId)
+            .stream()
+            .filter(group -> group.getDeletedAt() == null)
+            .toList();
+    }
+
     public Group findById(Long id) {
         Group group = groupRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));

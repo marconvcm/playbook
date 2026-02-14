@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${currentUser})}"></header>
+<main class="page">
+    <section class="card">
+        <h2>Profile</h2>
+        <p><strong th:text="${currentUser.firstName} + ' ' + ${currentUser.lastName}">Name</strong></p>
+        <p class="muted" th:text="${currentUser.email}">email@site.com</p>
+    </section>
+
+    <section class="card">
+        <h2>Your posts</h2>
+        <div class="list" th:if="${!userPosts.isEmpty()}">
+            <article class="item" th:each="post : ${userPosts}">
+                <h3><a th:href="@{/app/posts/{id}(id=${post.id})}" th:text="${post.title}">Post</a></h3>
+                <p th:text="${post.content}">Content</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${userPosts.isEmpty()}">No posts yet.</p>
+    </section>
+
+    <section class="card">
+        <h2>Groups you own</h2>
+        <div class="list" th:if="${!ownedGroups.isEmpty()}">
+            <article class="item" th:each="group : ${ownedGroups}">
+                <h3><a th:href="@{/app/groups/{id}(id=${group.id})}" th:text="${group.title}">Group</a></h3>
+                <p class="muted" th:text="${group.groupId}">group-id</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${ownedGroups.isEmpty()}">No owned groups.</p>
+    </section>
+
+    <section class="card">
+        <h2>Groups you are member of</h2>
+        <div class="list" th:if="${!memberGroups.isEmpty()}">
+            <article class="item" th:each="group : ${memberGroups}">
+                <h3><a th:href="@{/app/groups/{id}(id=${group.id})}" th:text="${group.title}">Group</a></h3>
+                <p class="muted" th:text="${group.groupId}">group-id</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${memberGroups.isEmpty()}">No member groups yet.</p>
+    </section>
+</main>
+</body>
+</html>

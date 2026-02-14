@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' · Playbook'">Playbook</title>
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+<header th:fragment="navbar(currentUser)">
+    <nav class="topbar">
+        <div class="brand"><a th:href="@{/app}">Playbook</a></div>
+        <div class="links">
+            <a th:href="@{/app}">Home</a>
+            <a th:href="@{/app/profile}">Profile</a>
+        </div>
+        <div class="user-state" th:if="${currentUser != null}">
+            <span th:text="${currentUser.firstName} + ' ' + ${currentUser.lastName}">User</span>
+            <form th:action="@{/app/ui/signout}" method="post">
+                <button type="submit" class="btn subtle">Sign out</button>
+            </form>
+        </div>
+        <div class="user-state muted" th:if="${currentUser == null}">Not signed in</div>
+    </nav>
+</header>
+
+<section th:fragment="alerts" class="alerts">
+    <p class="alert success" th:if="${successMessage}" th:text="${successMessage}"></p>
+    <p class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+</section>
+</body>
+</html>

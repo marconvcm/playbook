@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Group')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar(${currentUser})}"></header>
+<main class="page">
+    <section class="card">
+        <h2 th:text="${group.title}">Group title</h2>
+        <p class="muted">Group ID: <span th:text="${group.groupId}">grp</span> · Owner #<span th:text="${group.ownerId}">1</span></p>
+        <p th:text="${group.summary}">summary</p>
+    </section>
+
+    <section class="card">
+        <h2>Group posts</h2>
+        <div class="list" th:if="${!posts.isEmpty()}">
+            <article class="item" th:each="post : ${posts}">
+                <h3><a th:href="@{/app/posts/{id}(id=${post.id})}" th:text="${post.title}">Post</a></h3>
+                <p class="muted">Author #<span th:text="${post.userId}">1</span></p>
+                <p th:text="${post.content}">Content</p>
+            </article>
+        </div>
+        <p class="muted" th:if="${posts.isEmpty()}">No posts in this group yet.</p>
+    </section>
+</main>
+</body>
+</html>

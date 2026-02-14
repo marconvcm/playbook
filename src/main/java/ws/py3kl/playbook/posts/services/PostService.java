@@ -27,6 +27,27 @@ public class PostService {
             .toList();
     }
 
+    public List<Post> findByUserId(Long userId) {
+        return postRepository.findByUserId(userId)
+            .stream()
+            .filter(post -> post.getDeletedAt() == null)
+            .toList();
+    }
+
+    public List<Post> findByGroupId(Long groupId) {
+        return postRepository.findByGroupId(groupId)
+            .stream()
+            .filter(post -> post.getDeletedAt() == null)
+            .toList();
+    }
+
+    public List<Post> findReplies(Long parentId) {
+        return postRepository.findByParentId(parentId)
+            .stream()
+            .filter(post -> post.getDeletedAt() == null)
+            .toList();
+    }
+
     public Post findById(Long id) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
