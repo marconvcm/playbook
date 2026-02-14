@@ -11,6 +11,9 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ws.py3kl.playbook.groups.exceptions.GroupNotFoundException;
+import ws.py3kl.playbook.groups.exceptions.GroupOwnershipException;
+import ws.py3kl.playbook.user.models.User;
 
 import java.time.LocalDateTime;
 
@@ -51,4 +54,23 @@ public class Group {
     @Column(name = "deleted_at")
     @JsonIgnore
     private LocalDateTime deletedAt;
+
+    @JsonIgnore
+    public Group checkOwnership(User currentUser) {
+        if (currentUser.isAdmin()) {
+            return this;
+        }
+        if (!this.ownerId.equals(currentUser.getId())) {
+            throw new GroupOwnershipException();
+        }
+        return this;
+    }
+
+    @JsonIgnore
+    public Group checkAvailability() {
+        if (this.deletedAt != null) {
+            throw new GroupNotFoundException();
+        }
+        return this;
+    }
 }

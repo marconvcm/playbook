@@ -60,6 +60,12 @@ databaseChangeLog:
                   name: refresh_token
                   type: VARCHAR(1024)
               - column:
+                  name: api_token
+                  type: VARCHAR(1024)
+              - column:
+                  name: system_user
+                  type: BOOLEAN
+              - column:
                   name: token_created_at
                   type: TIMESTAMP
               - column:

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ws.py3kl.playbook.user.models.User;
 import ws.py3kl.playbook.user.repositories.UserRepository;
+import ws.py3kl.playbook.user.services.UserService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(
@@ -35,10 +36,10 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring("Bearer ".length()).trim();
 
             if (!token.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                Optional<User> userOpt = userRepository.findByAccessToken(token);
+                Optional<User> optionalUser = userService.findByAccessToken(token);
 
-                if (userOpt.isPresent() && isTokenValid(userOpt.get())) {
-                    User user = userOpt.get();
+                if (optionalUser.isPresent() && isTokenValid(optionalUser.get())) {
+                    User user = optionalUser.get();
                     UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

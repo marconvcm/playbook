@@ -2,9 +2,9 @@ package ws.py3kl.playbook.posts.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import ws.py3kl.playbook.posts.exceptions.PostNotFoundException;
 import ws.py3kl.playbook.posts.models.Post;
 import ws.py3kl.playbook.posts.models.requests.CreatePostRequest;
 import ws.py3kl.playbook.posts.models.requests.UpdatePostRequest;
@@ -12,7 +12,11 @@ import ws.py3kl.playbook.posts.repositories.PostRepository;
 import ws.py3kl.playbook.user.models.User;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+
+import static ws.py3kl.playbook.posts.exceptions.PostFaultOperationException.parentChangeIsNotAllowed;
+import static ws.py3kl.playbook.posts.exceptions.PostFaultOperationException.parentIdCannotBeEqualsPostId;
 
 @Service
 public class PostService {
@@ -21,26 +25,27 @@ public class PostService {
     private PostRepository postRepository;
 
     public List<Post> findAll() {
-        return postRepository.findAll()
+        return postRepository.findAllByDeletedAtIsNull();
+    }
+
+    public List<Post> findAllByUserId(Long userId) {
+        return postRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId)
             .stream()
-            .filter(post -> post.getDeletedAt() == null)
+            .filter(Post::isPersonalPost)
             .toList();
     }
 
     public Post findById(Long id) {
-        Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
-
-        if (post.getDeletedAt() != null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-        }
-
-        return post;
+        return postRepository.findById(id).orElseThrow(PostNotFoundException::new);
     }
 
     @Transactional
     public Post create(User currentUser, CreatePostRequest createPostRequest) {
+        String requestHash = String.valueOf(createPostRequest.hashCode());
         LocalDateTime now = LocalDateTime.now();
+
+        postRepository.findAllByRequestHash(requestHash)
+            .forEach(post -> post.checkCreationRules(currentUser));
 
         Post post = new Post();
         post.setUserId(currentUser.getId());
@@ -48,6 +53,7 @@ public class PostService {
         post.setGroupId(createPostRequest.getGroupId());
         post.setTitle(createPostRequest.getTitle());
         post.setContent(createPostRequest.getContent());
+        post.setRequestHash(requestHash);
         post.setCreatedAt(now);
         post.setUpdatedAt(now);
 
@@ -55,17 +61,16 @@ public class PostService {
     }
 
     @Transactional
-    public Post update(Long id, User currentUser, UpdatePostRequest updatePostRequest) {
-        Post post = findById(id);
+    public Post update(Long id, User currentUser, UpdatePostRequest request) {
+        Post post = findById(id)
+            .checkAvailability()
+            .checkOwnership(currentUser)
+            .checkCompatibility(currentUser, request);
 
-        if (!post.getUserId().equals(currentUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this post");
-        }
-
-        post.setParentId(updatePostRequest.getParentId());
-        post.setGroupId(updatePostRequest.getGroupId());
-        post.setTitle(updatePostRequest.getTitle());
-        post.setContent(updatePostRequest.getContent());
+        post.setParentId(request.getParentId());
+        post.setGroupId(request.getGroupId());
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
         post.setUpdatedAt(LocalDateTime.now());
 
         return postRepository.save(post);
@@ -73,11 +78,9 @@ public class PostService {
 
     @Transactional
     public void delete(Long id, User currentUser) {
-        Post post = findById(id);
-
-        if (!post.getUserId().equals(currentUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this post");
-        }
+        Post post = findById(id)
+            .checkAvailability()
+            .checkOwnership(currentUser);
 
         post.setDeletedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());

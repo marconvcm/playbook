@@ -1,4 +1,4 @@
-package ws.py3kl.playbook.user.models;
+package ws.py3kl.playbook.user.models.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -9,7 +9,7 @@ import ws.py3kl.playbook.user.services.UserService;
 import ws.py3kl.playbook.user.utils.CurrentUser;
 
 @RestController
-@RequestMapping("/v1/user")
+@RequestMapping("/v1/users")
 public class UserController {
 
     @Autowired

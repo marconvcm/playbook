@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -63,6 +64,14 @@ public class User implements UserDetails {
     @Column(name = "refresh_token")
     @JsonIgnore
     protected String refreshToken;
+
+    @Column(name = "api_token")
+    @JsonIgnore
+    protected String apiToken;
+
+    @Column(name = "system_user")
+    @JsonIgnore
+    protected Boolean systemUser = false;
 
     @Column(name = "token_created_at")
     @JsonIgnore
@@ -126,6 +135,17 @@ public class User implements UserDetails {
     }
 
     public long getTokenExpiresIn() {
+        if (tokenCreatedAt == null) {
+            return 0;
+        }
         return tokenExpiresAt.toEpochSecond(java.time.ZoneOffset.UTC) - LocalDateTime.now().toEpochSecond(java.time.ZoneOffset.UTC);
+    }
+
+    public boolean isAdmin() {
+        return Arrays.asList(roles).contains("ROLE_ADMIN");
+    }
+
+    public boolean isNonSystemUser() {
+        return systemUser == null || !systemUser;
     }
 }

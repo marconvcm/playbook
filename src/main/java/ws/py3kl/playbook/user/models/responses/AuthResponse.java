@@ -1,10 +1,8 @@
-package ws.py3kl.playbook.user.models;
+package ws.py3kl.playbook.user.models.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor

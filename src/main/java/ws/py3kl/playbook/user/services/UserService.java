@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ws.py3kl.playbook.user.exceptions.WrongPasswordException;
-import ws.py3kl.playbook.user.models.CreateUserRequest;
+import ws.py3kl.playbook.user.models.requests.CreateUserRequest;
 import ws.py3kl.playbook.user.models.User;
 import ws.py3kl.playbook.user.repositories.UserRepository;
 import ws.py3kl.playbook.utils.SaltGenerator;
@@ -34,14 +34,13 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        return findByEmail(username);
     }
 
     @Transactional
     public User authenticate(String email, String password) {
         LocalDateTime now = LocalDateTime.now();
-        User user = (User) loadUserByUsername(email);
+        User user = findByEmail(email);
         if (passwordEncoder.matches(password + user.getPasswordSalt(), user.getPassword())) {
             user.setLastLoginAt(LocalDateTime.now());
             user.setAccessToken(tokenGenerator.generate());
@@ -82,6 +81,20 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> findByAccessToken(String accessToken) {
-        return userRepository.findByAccessToken(accessToken);
+        return userRepository.findByAccessToken(accessToken)
+            .filter(User::isEnabled);
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    public Optional<User> findByHandle(String handle) {
+        return userRepository.findByHandle(handle);
+    }
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 }

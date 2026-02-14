@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ws.py3kl.playbook.user.exceptions.WrongPasswordException;
-import ws.py3kl.playbook.user.models.CreateUserRequest;
+import ws.py3kl.playbook.user.models.requests.CreateUserRequest;
 import ws.py3kl.playbook.user.models.User;
 import ws.py3kl.playbook.user.repositories.UserRepository;
 import ws.py3kl.playbook.utils.SaltGenerator;
