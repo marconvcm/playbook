@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ws.py3kl.playbook.groups.models.Group;
+import ws.py3kl.playbook.groups.models.GroupMember;
 import ws.py3kl.playbook.groups.models.requests.CreateGroupRequest;
 import ws.py3kl.playbook.groups.models.requests.UpdateGroupRequest;
 import ws.py3kl.playbook.groups.services.GroupService;
@@ -40,6 +41,11 @@ public class GroupController {
     @PostMapping
     public AcknowledgeResponse<Group> createGroup(@CurrentUser User currentUser, @Valid @RequestBody CreateGroupRequest createGroupRequest) {
         return AcknowledgeResponse.of(groupService.create(currentUser, createGroupRequest), "Group created successfully");
+    }
+
+    @PutMapping("/{id}/join")
+    public AcknowledgeResponse<GroupMember> joinGroup(@CurrentUser User currentUser, @PathVariable Long id) {
+        return AcknowledgeResponse.of(groupService.joinGroup(currentUser, id), "Joined group successfully");
     }
 
     @PutMapping("/{id}")

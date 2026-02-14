@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "groups", indexes = {
-        @Index(name = "idx_groups_group_id", columnList = "group_id"),
-        @Index(name = "idx_groups_owner_id", columnList = "owner_id")
+    @Index(name = "idx_groups_group_id", columnList = "group_id"),
+    @Index(name = "idx_groups_owner_id", columnList = "owner_id")
 })
 public class Group {
 
@@ -42,6 +42,9 @@ public class Group {
 
     @Column(name = "summary")
     private String summary;
+
+    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isPrivate = false;
 
     @Column(name = "created_at", nullable = false)
     @JsonIgnore
@@ -72,5 +75,17 @@ public class Group {
             throw new GroupNotFoundException();
         }
         return this;
+    }
+
+    public String getHref() {
+        return "/v1/groups/" + this.id;
+    }
+
+    public String getJoinHref() {
+        return getHref() + "/join";
+    }
+
+    public String getPostsHref() {
+        return getHref() + "/posts";
     }
 }

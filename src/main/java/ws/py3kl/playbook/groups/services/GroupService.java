@@ -5,13 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ws.py3kl.playbook.groups.exceptions.GroupNotFoundException;
 import ws.py3kl.playbook.groups.models.Group;
+import ws.py3kl.playbook.groups.models.GroupMember;
+import ws.py3kl.playbook.groups.models.responses.UserGroupsResponse;
 import ws.py3kl.playbook.groups.models.requests.CreateGroupRequest;
 import ws.py3kl.playbook.groups.models.requests.UpdateGroupRequest;
+import ws.py3kl.playbook.groups.repositories.GroupMemberRepository;
 import ws.py3kl.playbook.groups.repositories.GroupRepository;
 import ws.py3kl.playbook.user.models.User;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static ws.py3kl.playbook.groups.exceptions.GroupFaultOperationException.groupIdAlreadyExists;
 
@@ -21,6 +26,9 @@ public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private GroupMemberRepository groupMemberRepository;
+
     public List<Group> findAll() {
         return groupRepository.findAllByDeletedAtIsNull();
     }
@@ -29,8 +37,11 @@ public class GroupService {
         return groupRepository.findById(id).orElseThrow(GroupNotFoundException::new);
     }
 
-    public List<Group> findAllByUserId(Long userId) {
-        return groupRepository.findAllByOwnerIdAndDeletedAtIsNull(userId);
+    public UserGroupsResponse findAllByUserId(Long userId) {
+        return new UserGroupsResponse(
+            groupRepository.findAllByOwnerIdAndDeletedAtIsNull(userId).stream().toList(),
+            groupMemberRepository.findAllByUserId(userId).stream().map(GroupMember::getGroup).toList()
+        );
     }
 
     @Transactional
@@ -76,5 +87,26 @@ public class GroupService {
         group.setDeletedAt(LocalDateTime.now());
         group.setUpdatedAt(LocalDateTime.now());
         groupRepository.save(group);
+    }
+
+    @Transactional
+    public GroupMember joinGroup(User currentUser, long groupId) {
+        Group group = findById(groupId)
+            .checkAvailability();
+
+        if (groupMemberRepository.existsByGroupIdAndUserId(group.getId(), currentUser.getId())) {
+            throw new IllegalStateException("User is already a member of this group");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        GroupMember groupMember = new GroupMember();
+        groupMember.setGroup(group);
+        groupMember.setUser(currentUser);
+        groupMember.setAdmitted(!group.getIsPrivate());
+        groupMember.setCreatedAt(now);
+        groupMember.setUpdatedAt(now);
+
+        return groupMemberRepository.save(groupMember);
     }
 }

@@ -16,4 +16,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByRequestHash(String requestHash);
 
     List<Post> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId);
+
+    List<Post> findAllByGroupIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long groupId);
 }

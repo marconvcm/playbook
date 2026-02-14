@@ -132,6 +132,11 @@ public class Post {
     }
 
     @JsonIgnore
+    public boolean isGroupTopLevelPost() {
+        return isGroupPost() && parentId == null;
+    }
+
+    @JsonIgnore
     public boolean isAnswerPost() {
         return parentId != null;
     }

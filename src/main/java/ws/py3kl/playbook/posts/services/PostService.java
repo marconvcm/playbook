@@ -35,6 +35,13 @@ public class PostService {
             .toList();
     }
 
+    public List<Post> findAllByGroupId(Long groupId) {
+        return postRepository.findAllByGroupIdAndDeletedAtIsNullOrderByCreatedAtDesc(groupId)
+            .stream()
+            .filter(Post::isGroupTopLevelPost)
+            .toList();
+    }
+
     public Post findById(Long id) {
         return postRepository.findById(id).orElseThrow(PostNotFoundException::new);
     }
